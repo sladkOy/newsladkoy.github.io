@@ -1,2 +1,2 @@
-# https://sladkoy.github.io/newsladkoy.github.io/
+# https://sladkoy.github.io/
 Сайт для лабораторных работ по СПИ
