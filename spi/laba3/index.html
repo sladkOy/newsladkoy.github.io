@@ -1,88 +1,45 @@
-<!DOCTYPE html>
-<html lang="ru">
-
+<html>
 <head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>xml parser</title>
-    <meta name="description" content="PrivateBank">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400" rel="stylesheet" />
-    <link href="css/style.css" type="text/css" rel="stylesheet">
-    <script type="text/javascript" src="js/main.js"></script>
-	<script src="js/jquery-1.9.1.min.js"></script>
-	<script src="css/5grid/init.js?use=mobile,desktop"></script>
-	<script src="js/jquery.formerize-1.1.js"></script>
-	<script src="js/init.js"></script>
-	<noscript>
-		<link rel="stylesheet" href="css/5grid/core.css" />
-		<link rel="stylesheet" href="css/5grid/core-desktop.css" />
-		<link rel="stylesheet" href="css/5grid/core-1200px.css" />
-		<link rel="stylesheet" href="css/5grid/core-noscript.css" />
-		<link rel="stylesheet" href="css/style-desktop.css" />
-		<link rel="stylesheet" href="css/noscript.css" />
-	</noscript>	
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 </head>
-
-<body style="font-family: 'Source Sans Pro'; font-style: normal; font-weight: 300.400; background: url(bg.jpg) no-repeat center fixed; background-size: 100%;">
-
-<!-- Wrapper-->
-			<div id="wrapper">
-
-				<!-- Main -->
-					<div id="main">
-						<h1>Стан валют на сьогодні згідно з курсом ПриватБанку</h1>
-
-						<!-- Me -->
-							<article id="me" class="panel">
-								<div>
-									<table id="p24tb" class="main" style="position: absolute; bottom: 50px; ">
-
-										<thead>
-											<tr>
-												<th>Валюта</th>
-												<th>Купівля</th>
-												<th>Продаж</th>
-												<th>Використана валюта</th>
-											</tr>
-										</thead>
-										<tbody class="tb">
-											<tr>
-												<td></td>
-												<td></td>
-												<td></td>
-												<td></td>
-											</tr>
-											<tr>
-												<td></td>
-												<td></td>
-												<td></td>
-												<td></td>
-											</tr>
-											<tr>
-												<td></td>
-												<td></td>
-												<td></td>
-												<td></td>
-											</tr>
-											<tr>
-												<td></td>
-												<td></td>
-												<td></td>
-												<td></td>
-											</tr>
-										</tbody>
-									</table>
-								</article>
-							</div>
-		
-				<!-- Footer -->
-					<div id="footer">
-						<ul class="links">
-							Designed by : <a href="https://sladkoy.github.io/">sladkOy</a>
-						</ul>
-					</div>
-		
-			</div>
-    
+<script> 
+	google.load("visualization", "1.1", 
+		{packages:["wordtree"]});
+		google.setOnLoadCallback(drawChart);
+		function drawChart() {
+			var data = google.visualization.arrayToDataTable(
+				[ ['Фразы'],
+				 ['Студент(курс_"Комп*ютерна_грамотність") Перевірка_рівня_грамотності Тест_пройдений_на_0% Початковий_рівень'],
+				 ['Студент(курс_"Комп*ютерна_грамотність") Перевірка_рівня_грамотності Тест_пройдений_на_0% "Відрахувати_мене_з_курсу"'],
+				 ['Студент(курс_"Комп*ютерна_грамотність") Перевірка_рівня_грамотності Тест_пройдений_на_25% Початковий_рівень'],
+				 ['Студент(курс_"Комп*ютерна_грамотність") Перевірка_рівня_грамотності Тест_пройдений_на_25% Достатній_рівень'],				 
+				 ['Студент(курс_"Комп*ютерна_грамотність") Перевірка_рівня_грамотності Тест_пройдений_на_50% Початковий_рівень'],
+				 ['Студент(курс_"Комп*ютерна_грамотність") Перевірка_рівня_грамотності Тест_пройдений_на_50% Достатній_рівень'],
+				 ['Студент(курс_"Комп*ютерна_грамотність") Перевірка_рівня_грамотності Тест_пройдений_на_75% Початковий_рівень'],
+				 ['Студент(курс_"Комп*ютерна_грамотність") Перевірка_рівня_грамотності Тест_пройдений_на_75% Достатній_рівень'],				 
+				 ['Студент(курс_"Комп*ютерна_грамотність") Перевірка_рівня_грамотності Тест_пройдений_на_75% Високий_рівень'],				 
+				 ['Студент(курс_"Комп*ютерна_грамотність") Перевірка_рівня_грамотності Тест_пройдений_на_100% Початковий_рівень'],		
+				 ['Студент(курс_"Комп*ютерна_грамотність") Перевірка_рівня_грамотності Тест_пройдений_на_100% Достатній_рівень'],				 
+				 ['Студент(курс_"Комп*ютерна_грамотність") Перевірка_рівня_грамотності Тест_пройдений_на_100% Високий_рівень'],				 
+				 ['Студент(курс_"Комп*ютерна_грамотність") Перевірка_рівня_грамотності Тест_пройдений_на_100% Вітаю'],	
+				 ['Студент(курс_"Комп*ютерна_грамотність") Перевірка_рівня_грамотності Тест_пройдений_на_100% Вітаю Сертифікат'],		
+				 ['Студент(курс_"Комп*ютерна_грамотність") Перевірка_рівня_грамотності Тест_пройдений_на_100% Вітаю Піти'],				 				  				 
+				 ]
+			);
+		var options = {
+			maxFontSize: 28,
+			wordtree: {
+				format: 'implicit',
+				word: 'Студент(курс_"Комп*ютерна_грамотність")'
+			}
+		};
+	var chart = new google.visualization.WordTree
+	(document.getElementById('wordtree_basic'));
+	chart.draw(data, options);
+ }
+ </script>
+ <body>
+ <div id="wordtree_basic" style="width: 100%; height: 100%;">
+ </div>
 </body>
 </html>
