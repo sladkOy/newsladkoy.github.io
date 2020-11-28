@@ -1,14 +1,234 @@
 <!DOCTYPE html>
+<html lang="uk">
 <head>
-	<title>1</title>
-	<link href="stylesheets/style.css" rel="stylesheet">
-	<script src="javascript/javascript.js"></script>
-  <script src="https://d3js.org/d3.v4.min.js"></script>
+	<meta charset="utf-8">
+	<title>Складові</title>
 </head>
 <body>
-<div id="option">
-    <input type="checkbox" checked="checked" class="messageCheckbox" value="chart1"/>1
-    <input type="checkbox" value="chart2" checked="checked" class="messageCheckbox" />2
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.min.js"></script>
+
+<span id="checkboxes">
+  <label><input type="checkbox" val="12.5" id='bloggood1' onchange='showOrHide("bloggood1","cat1");'>Поняття алгоритм</label>
+  <label><input type="checkbox" val="12.5" id='bloggood2' onchange='showOrHide("bloggood2","cat2");'>Поняття мови</label>
+  <label><input type="checkbox" val="12.5" id='bloggood3' onchange='showOrHide("bloggood3","cat3");'>Рівень формалізації</label>
+  <label><input type="checkbox" val="12.5" id='bloggood4' onchange='showOrHide("bloggood4","cat4");'>Принцип дискретності</label>
+  <label><input type="checkbox" val="12.5" id='bloggood5' onchange='showOrHide("bloggood5","cat5");'>Принцип блочності</label>
+  <label><input type="checkbox" val="12.5" id='bloggood6' onchange='showOrHide("bloggood6","cat6");'>Принцип розгалуження&nbsp;</label>
+  <label><input type="checkbox" val="12.5" id='bloggood7' onchange='showOrHide("bloggood7","cat7");'>Принцип циклічності</label>
+  <label><input type="checkbox" val="12.5" id='bloggood8' onchange='showOrHide("bloggood8","cat8");'>Виконання алгоритму</label>
+</span>
+
+<span id="donut"></span>
+
+<script>
+  let rawData = [...document.querySelectorAll('#checkboxes input')].map(cb => 
+     ({ value: +cb.getAttribute('val'), selected: cb.checked }));
+
+  // базовый размер и время анимации
+  let size = 400, time = 500; 
+  
+  // цветовая шкала 
+  // (функция которая принимает на вход число и возвращает цвет, тут их 10)
+  let colors = d3.scaleOrdinal(d3.schemeCategory10);
+
+  // чекбоксы
+  d3.select('#checkboxes').selectAll('label').data(rawData)
+    .style('background-color', (d, i) => colors(i))
+    
+  d3.select('#checkboxes').selectAll('input').data(rawData)  
+    .on("change", function (d) { 
+      update(d.selected = this.checked); 
+    });
+
+  // добавим svg
+  let svg = d3.select('#donut').append("svg").attr("height", size)
+              .attr("viewBox", `-${size} -${size/2} ${size*2} ${size}`);
+
+  // инициализируем генератор данных для передачи в генератор arc()
+  let pie = d3.pie().value(d => d.selected ? d.value : 0).sort(null);
+
+  let pieData = pie(rawData);
+
+  // инициализируем генератор дуг для секторов
+  let arc = d3.arc().innerRadius(size/3.1-30).outerRadius(size/3.1);
+
+  // инициализируем генератор дуг для подсчета линий подписей
+  let arc2 = d3.arc().innerRadius(size/2.7).outerRadius(size/2.7);
+
+  // инициализируем генератор дуг для подсчета центров текста подписей
+  let arc3 = d3.arc().innerRadius(size/2.2).outerRadius(size/2.2);
+
+  // инициализируем генератор линий
+  let line = d3.line();
+
+  // создаем выборку (групп) элементов и привязываем к ней данные
+  let groups = svg.selectAll("g").data(rawData)
+                  .enter().append("g").attr('opacity', (d,i) => pieData[i].value);
+
+  // добавляем пути для секторов в группы, 
+  // данные привязанные к группам тут нам достаются по наследству
+  let sectors = groups.data(pieData).append("path").classed("sector", true)
+                      .attr("fill", (d, i) => colors(i));
+
+  // пути для линий подписей
+  let titlesPaths = groups.data(pieData).append("path").classed("label", true);
+
+  // тексты подписей
+  let titlesTexts = groups.data(pieData).append("text")
+                          .text((d,i) => rawData[i].value);
+
+  // текст в центре 
+  let totalText = svg.append('text').style('font-size', 34).attr('y', 2);
+
+  // начальная анимация путей секторов                 
+  sectors.transition().duration(time).attrTween('d', growSectorsPaths); 
+
+  // начальная анимация путей для подписей
+  titlesPaths.transition().duration(time).attr('opacity', 1)
+             .attrTween('d', growTitlesPaths); 
+
+  // начальная анимация текста подписей
+  titlesTexts.transition().duration(time)
+          .attrTween("x", tweenTitlesTextsX)
+          .attrTween("y", tweenTitlesTextsY);
+          
+  // начальная анимация текста по центру
+  totalText.datum(calcTotal()).transition().duration(time)
+           .tween("text", interpolateTotal)
+
+  function update() {
+      let d = pie(rawData);
+
+      // задаем анимацию перехода путям секторов 
+      sectors.data(d).transition().duration(time)
+          .attrTween("d", tweenSectorsPaths);
+
+      groups.data(d).transition().duration(time)
+          .attr('opacity', d => d.value ? 1 : 0)
+
+      // задаем анимацию перехода путям для подписей
+      titlesPaths.data(d).transition().duration(time)
+          .attrTween("d", tweenTitlesPaths);
+
+      // задаем анимацию перехода путям для подписей
+      titlesTexts.data(d).transition().duration(time)
+          .attrTween("x", tweenTitlesTextsX)
+          .attrTween("y", tweenTitlesTextsY);
+          
+      // анимация текста по центру
+      totalText.datum(calcTotal()).transition().duration(time)
+           .tween("text", interpolateTotal) 
+  }
+
+  function growTitlesPaths(d) {
+      let i = d3.interpolate(size/4, size/2.7);
+      return t => {
+        let r = i(t);
+        arc2.innerRadius(r).outerRadius(r);
+        return line([arc.centroid(this._current = d),arc2.centroid(d)]);
+      }
+  }
+
+  function growSectorsPaths(d) {
+     let c = (d.startAngle+d.endAngle)/2;
+     let il = d3.interpolate(c, d.startAngle);
+     let ir = d3.interpolate(c, d.endAngle)
+     return t => {
+       d.startAngle = il(t);
+       d.endAngle = ir(t);
+       return arc(this._current = d);
+     }; 
+  }
+
+  function tweenSectorsPaths(d) {
+    let i = lerp(this, d);
+    return t => arc(i(t));
+  }
+
+  function tweenTitlesPaths(d) {
+    let i = lerp(this, d);
+    return t => line([arc.centroid(i(t)), arc2.centroid(i(t))]);
+  }
+
+  function tweenTitlesTextsX(d) {
+    let i = lerp(this, d, '_currentX');
+    return t => arc3.centroid(i(t))[0];
+  }
+
+  function tweenTitlesTextsY(d) {
+    let i = lerp(this, d, '_currentY');
+    return t => arc3.centroid(i(t))[1];
+  }
+
+  function interpolateTotal(d) {
+    let i = lerp(this, d);
+    return t => Math.round(i(t));
+  }
+
+  function lerp(el, d, key){
+    key = key || '_current';
+    return d3.interpolate(el[key] || 0, el[key] = d);
+  }
+
+  function calcTotal() {
+    return rawData.map(d => d.selected ? d.value : 0).reduce((a,v) => a + v, 0)
+  }
+
+  function interpolateTotal(d) {
+    let that = d3.select(this);
+    let i = lerp(this, d);
+    return t => that.text(Math.floor(i(t)))
+  }
+
+  function showOrHide(bloggood, cat) {
+    bloggood = document.getElementById(bloggood);
+    cat = document.getElementById(cat);
+    if (bloggood.checked) cat.style.display = "block";
+    else cat.style.display = "none";
+  }  
+</script>
+
+<style>
+  label {
+    font-size: 14px;
+    font-family: arial;
+    display: block;
+  }
+  span {
+    display: inline-block;
+  }
+  path.label {
+    stroke-width: 1.4;
+    stroke: black;
+  }
+  text {
+    font-size: 14px;
+    font-family: arial;
+    dominant-baseline: middle;
+    text-anchor: middle;  
+  }
+  .skladovi {
+  	font-size: 14px;
+    font-family: arial;
+  }
+</style>
+<div class="skladovi">
+	<div id ='cat1' style='display: none;'><p>Розуміння сутності поняття алгоритму є основною складовою комп'ютерної грамотності. Істотне значення має розуміння таких властивостей алгоритмів як формальність, дискретність, зрозумілість визначеність, масовість, результативність</p></div>
+<br>
+	<div id='cat2' style='display: none;'><p>Формулювання будь-якого алгоритму передбачає використання мови, якою його описують У зв'язку з цим поняття алгоритму перебуває в нерозривному зв'язку з поняттям мови як системи засобів подання алгоритму Вибір мови в кожному конкретному випадку визначається галуззю застосування алгоритму та специфікою системи операцій, які здатен здійснити виконавець Дотримання вимог ретельною врахування можливостей конкретних виконавців алгоритмів становить обов'язковий компонент комп'ютерної грамотності</p></div>
+<br>
+	<div id = 'cat3' style = 'display: none;'><p>Поняття рівня формалізації подання а алгоритму нерозривно пов'язане з поняттям мови Якщо для реалізації алгоритму передбачається використання автомату зокрема комп'ютера, то опис алгоритму підпорядковується точним формальним правилам а сама мова, що використовується при цьому, повинна бути формалізованою Рівні формалізації подання алгоритмів, що застосовуються на практиці, можуть варіюватися в досить широкому діапазоні від рівня повної відсутності формалізації до рівня «абсолютної» формалізації. Вміння працювати з мовами різних рівнів формалізації є істотним компонентом комп’ютерної грамотності</p></div>
+<br>
+	<div id = 'cat4' style = 'display: none;'><p>Побудовою алгоритму передбачається виділення чіткої і цілеспрямованої послідовності допустимих операцій, виконання яких приводить до необхідною результату У різних мовах такі точні дискретні етапи алгоритму подаються різними засобами У словесних поняттях алгоритму (природною мовою) — це окремі пропозиції вказівки пункти в мові графічних схем — це окремі графічні зображення підзадач готової задачі в об’єктній мові ЕОМ  - це окремі команди  в мові програмування високою рівня —  це оператори(команди)і блоки</p></div>
+<br>
+	<div id="cat5" style="display: none;"><p>Тут  ідеться про вміння розчленовувати складну задачу на простіші складові.  Так доводиться діяти адже коли задача виявляється занадто складною для того, щоб опис алгоритму її розв'язування потрібною мовою можна було подати відразу. У цьому випадку задачу поділяють на підзадачі — інформаційно замкнуті частини (блоки), яким надається самостійне значення. Після складання первинної схеми, що зв'язує окремі частини задачі в єдине ціле, проводиться робота щодо деталізації окремих блоків. Кожний з цих блоків, у свою чергу, може бути деталізований за описаним вище принципом</p>
+		<p>Принцип блочності, будучи по суті загальним прийомом мислення, має велике загальноосвітнє і виховне значення. Дуже часто саме таким способом проводиться дослідження з найрізноманітніших проблем у різних галузях знань</p></div>
+<br>
+    <div id="cat6" style="display: none;"><p>Принцип алгоритмічної повноти мови, що використовується для подання алгоритмів, повинен забезпечувати можливість реалізації логічних ситуацій, тобто ситуацій, що передбачають прийняття рішень відповідно до певних умов. Організація таких алгоритмів потребує вмілого використання описів таких операцій розгалуження. Істотними компонентами комп'ютерної грамотності є усвідомлення того, що: а) опис повинен передбачати всі можливі варіанти початкових даних і для кожної їх комбінації бути результативним;б) для конкретних значень початкових даних виконання алгоритму завжди проходить тільки по одному з можливих шляхів, який визначається конкретними умовами</p></div>
+<br>
+    <div id="cat7" style="display: none;"><p>Побудова алгоритмів у багатьох випадках передбачає можливість багаторазового виконання одного і того самого набору операцій при значеннях величин, що змінюються. Істотним компонентом комп'ютерної грамотності тут є розуміння тієї або іншої схеми функціонування циклічного процесу, що використовується в алгоритмі, і, що особливо важливо, вміння виділяти при побудові алгоритмів набори повторюваних операцій</p></div>
+<br>
+    <div id="cat8" style="display: none;"><p>Важливим компонентом комп'ютерної грамотності є вміння сприймати фрагменти опису алгоритму і діяти з даними, відсторонюючись від передбачуваних результатів, так, як вони описані, а не так, як, можливо, хотілося розробникам алгоритму. Іншими словами, потрібне розвинуте вміння чітко зіставляти те, що задумано, з тим, що фактично написано</p></div>
 </div>
 </body>
 </html>
