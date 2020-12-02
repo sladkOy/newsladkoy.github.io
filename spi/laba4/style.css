@@ -1,0 +1,29 @@
+label {
+    font-size: 14px;
+    font-family: arial;
+    display: block;
+}
+span {
+    display: inline-block;
+}
+#donut p {
+  	font-family: monospace; 
+  	text-align: center;
+}
+path.label {
+    stroke-width: 1.4;
+    stroke: black;
+}
+text {
+    font-size: 14px;
+    font-family: arial;
+    dominant-baseline: middle;
+    text-anchor: middle;  
+}
+.skladovi {
+  	font-size: 14px;
+    font-family: arial;
+}
+#cat1, #cat2, #cat3, #cat4, #cat5, #cat6, #cat7, #cat8 {
+  display: none
+}
